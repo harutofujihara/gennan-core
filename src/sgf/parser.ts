@@ -1,0 +1,145 @@
+import { nanoid } from "nanoid";
+import { Point } from "../types";
+import { assertIsDefined } from "../utils";
+import { Tree } from "./tree";
+import {
+  Node,
+  RootNode,
+  InternalNode,
+  Property,
+  Properties,
+  isProperty,
+} from "./node";
+
+class SGFFormatError extends Error {
+  constructor(message?: string) {
+    super(message);
+    this.name = "ValidationError";
+  }
+}
+
+// SGFの構造例
+// (;ルート
+//   (;着手1a;着手2a(;着手3aa)
+//                  (;着手3ab;着手4ab))
+//   (;着手1b(;着手2ba;着手3ba;着手4ba)
+//           (;着手3bb)))
+
+function toTree(sgf: string): Tree {
+  const rootNode = toNode(sgf);
+  return new Tree({ rootNode });
+}
+
+function toNode(sgf: string, parent?: Node): Node {
+  if (!sgf.startsWith("(") || !sgf.endsWith(")")) throw new SGFFormatError();
+  // 先頭と末尾の()を取り除く
+  const sgfStr = sgf.slice(1).slice(0, -1);
+
+  // 親ノードを作成
+  const firstLeftBracketIdx = sgfStr.indexOf("(");
+
+  const branchSgf =
+    firstLeftBracketIdx !== -1 ? sgfStr.slice(0, firstLeftBracketIdx) : sgfStr;
+  const nodeSgfs = branchSgf.split(";").filter((s) => s !== "");
+
+  let top;
+  if (parent == null) {
+    top = new RootNode({
+      id: nanoid(),
+      properties: toProperties(nodeSgfs[0]),
+    });
+  } else {
+    top = new InternalNode({
+      id: nanoid(),
+      properties: toProperties(nodeSgfs[0]),
+      parent,
+    });
+  }
+
+  nodeSgfs.shift();
+
+  let bottom = top;
+  for (const nodeSgf of nodeSgfs) {
+    const properties = toProperties(nodeSgf);
+    const node = new InternalNode({ id: nanoid(), properties, parent: bottom });
+    bottom.addChild(node);
+    bottom = node;
+  }
+
+  // childrenの生成
+  const children: Array<InternalNode> = [];
+  let leftBracketIdx = -1;
+  let leftBracketCount = 0;
+  let rightBracketCount = 0;
+  for (let i = 0; i < sgfStr.length; i++) {
+    if (sgfStr.charAt(i) === "(") {
+      if (leftBracketIdx === -1) leftBracketIdx = i;
+      leftBracketCount += 1;
+    }
+
+    if (sgfStr.charAt(i) === ")") {
+      if (leftBracketIdx === -1) throw new SGFFormatError();
+      rightBracketCount += 1;
+      if (leftBracketCount === rightBracketCount) {
+        // 再帰
+        const child = toNode(sgfStr.substring(leftBracketIdx, i + 1), bottom);
+        children.push(child as InternalNode);
+        leftBracketIdx = -1;
+        leftBracketCount = 0;
+        rightBracketCount = 0;
+      }
+    }
+  }
+
+  if (
+    leftBracketIdx !== -1 ||
+    leftBracketCount !== 0 ||
+    rightBracketCount !== 0
+  ) {
+    throw new SGFFormatError(); // 対応する')'が見つからなかった場合
+  }
+
+  for (const child of children) {
+    bottom.addChild(child);
+  }
+
+  return top;
+}
+
+// SZ[19]PB[芝野虎丸]PW[余正麒]AB[ab][cd] => {SZ: ["19"], PB: ["芝野虎丸"], PW: ["余正麒"], AB: ["ab", "cd"]}
+function toProperties(nodeSgf: string): Properties {
+  const regexp = new RegExp("(.*?])(?=[A-Z])|(.*?])$", "g");
+  const props = nodeSgf.match(regexp);
+  assertIsDefined(props);
+  const properties: Properties = {};
+  props.map((p) => {
+    const regexp = new RegExp("(.*?)(?=\\[)", "g");
+    const result = p.match(regexp);
+    assertIsDefined(result);
+    if (!isProperty(result[0])) throw new Error(); // Propertyが正しい値かどうか
+    properties[result[0]] = [];
+
+    const regexp2 = new RegExp("(?<=\\[).*?(?=])", "g");
+    const result2 = p.match(regexp2);
+    assertIsDefined(result2);
+    result2.map((r) => properties[result[0] as Property]?.push(r));
+  });
+
+  return properties;
+}
+
+function toPoint(point: string): Point {
+  const alpha = "abcdefghijklmnopqrs".split("");
+  const pointArr = point.toLowerCase().split("");
+  return {
+    x: alpha.indexOf(pointArr[0]) + 1,
+    y: alpha.indexOf(pointArr[1]) + 1,
+  };
+}
+
+function pointTo(point: Point): string {
+  const alpha = "abcdefghijklmnopqrs";
+  return alpha.substr(point.x - 1, 1) + alpha.substr(point.y - 1, 1);
+}
+
+export { toProperties, toTree, toPoint, pointTo };
