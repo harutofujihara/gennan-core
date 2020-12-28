@@ -1,4 +1,4 @@
-import { nanoid } from "nanoid";
+import { randmStr } from "../utils";
 import {
   Node,
   RootNode,
@@ -104,7 +104,7 @@ class Tree {
 
   public createChildNode(properties: Properties): InternalNode {
     return new InternalNode({
-      id: nanoid(),
+      id: randmStr(),
       properties,
       parent: this._currentNode,
     });

@@ -19,3 +19,7 @@ export function nextAlpha(s: string): string {
   const alpha = "abcdefghijklmnopqrstuvwxyz".split("");
   return alpha[alpha.indexOf(s.toLowerCase()) + 1];
 }
+
+export function randmStr(): string {
+  return Math.random().toString(32).substring(2);
+}

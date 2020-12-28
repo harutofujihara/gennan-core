@@ -1,6 +1,5 @@
-import { nanoid } from "nanoid";
 import { Point } from "../types";
-import { assertIsDefined } from "../utils";
+import { assertIsDefined, randmStr } from "../utils";
 import { Tree } from "./tree";
 import {
   Node,
@@ -45,12 +44,12 @@ function toNode(sgf: string, parent?: Node): Node {
   let top;
   if (parent == null) {
     top = new RootNode({
-      id: nanoid(),
+      id: randmStr(),
       properties: toProperties(nodeSgfs[0]),
     });
   } else {
     top = new InternalNode({
-      id: nanoid(),
+      id: randmStr(),
       properties: toProperties(nodeSgfs[0]),
       parent,
     });
@@ -61,7 +60,11 @@ function toNode(sgf: string, parent?: Node): Node {
   let bottom = top;
   for (const nodeSgf of nodeSgfs) {
     const properties = toProperties(nodeSgf);
-    const node = new InternalNode({ id: nanoid(), properties, parent: bottom });
+    const node = new InternalNode({
+      id: randmStr(),
+      properties,
+      parent: bottom,
+    });
     bottom.addChild(node);
     bottom = node;
   }
