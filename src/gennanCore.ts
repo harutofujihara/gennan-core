@@ -21,7 +21,7 @@ import {
 import { Board } from "./rule";
 import { nextAlpha } from "./utils";
 
-type Option = {
+export type MoveOption = {
   idx: number;
   move: Move;
 };
@@ -153,7 +153,7 @@ class GennanCore {
     }
 
     // next
-    const nos = this.nextOptions.filter((no) => no.move.point != null);
+    const nos = this.nextMoveOptions.filter((no) => no.move.point != null);
     if (nos.length > 0) {
       nos.map((no) => {
         if (no.move.point != null) {
@@ -174,7 +174,7 @@ class GennanCore {
     return this.tree.getCurrentPath();
   }
 
-  get nextOptions(): Array<Option> {
+  get nextMoveOptions(): Array<MoveOption> {
     return this.tree.nextNodes.map((v, i) => {
       return {
         idx: i,
