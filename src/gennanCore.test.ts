@@ -7,11 +7,11 @@ test("toProperties", () => {
     "(;SZ[19]PB[芝野虎丸]PW[余正麒]AB[ab][cd](;B[jj];W[ii])(;B[ij];W[hi]))"
   );
 
-  expect(gc.nextOptions.length).toBe(2);
+  expect(gc.nextMoveOptions.length).toBe(2);
   gc.playForward();
-  expect(gc.nextOptions.length).toBe(1);
+  expect(gc.nextMoveOptions.length).toBe(1);
   gc.playBackward();
-  expect(gc.nextOptions.length).toBe(2);
+  expect(gc.nextMoveOptions.length).toBe(2);
 
   expect(gc.viewBoard.length).toBe(19);
 });
@@ -59,7 +59,7 @@ test("view board", () => {
 
 test("create from gridnum", () => {
   const gc = GennanCore.create(19);
-  expect(gc.nextOptions.length).toBe(0);
+  expect(gc.nextMoveOptions.length).toBe(0);
 });
 
 test("playToPath", () => {
@@ -78,11 +78,11 @@ test("add move", () => {
 
   gc.playForward();
   gc.addMove({ color: Color.White, point: { x: 3, y: 3 } });
-  expect(gc.nextOptions.length).toBe(2);
-  gc.playForward(gc.nextOptions.length - 1);
-  expect(gc.nextOptions.length).toBe(0);
+  expect(gc.nextMoveOptions.length).toBe(2);
+  gc.playForward(gc.nextMoveOptions.length - 1);
+  expect(gc.nextMoveOptions.length).toBe(0);
   gc.addMove({ color: Color.Black, point: { x: 2, y: 2 } });
-  expect(gc.nextOptions.length).toBe(1);
+  expect(gc.nextMoveOptions.length).toBe(1);
 });
 
 test("set and remove circle", () => {
