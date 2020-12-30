@@ -383,44 +383,44 @@ class GennanCore {
     this.tree.setProps(properties);
   }
 
-  // public setAlpha(point: Point): void {
-  //   const ps = pointTo(point);
-  //   const properties = this.tree.properties;
-  //   const LB = properties[Property.LB];
+  public setAlpha(point: Point): void {
+    const ps = pointTo(point);
+    const properties = this.tree.properties;
+    const LB = properties[Property.LB];
 
-  //   let next = "A";
-  //   if (LB != null) {
-  //     const regex = /[^a-z]/gi; // a-z(lower,upperは無視)以外の文字が含まれているか判定する正規表現
-  //     const alphas = LB.filter((v) => !v.slice(-1).match(regex));
-  //     if (alphas.length > 0) {
-  //       const last = alphas.map((v) => v.slice(-1)).sort()[alphas.length - 1];
-  //       next = nextAlpha(last).toUpperCase();
-  //     }
-  //   }
+    let next = "A";
+    if (LB != null) {
+      const regex = /[^a-z]/gi; // a-z(lower,upperは無視)以外の文字が含まれているか判定する正規表現
+      const alphas = LB.filter((v) => !v.slice(-1).match(regex));
+      if (alphas.length > 0) {
+        const last = alphas.map((v) => v.slice(-1)).sort()[alphas.length - 1];
+        next = nextAlpha(last).toUpperCase();
+      }
+    }
 
-  //   this.setProp(Property.LB, ps + ":" + next);
-  // }
+    this.setProp(Property.LB, ps + ":" + next);
+  }
 
-  // public setIncrement(point: Point): void {
-  //   const ps = pointTo(point);
-  //   const properties = this.tree.properties;
-  //   const LB = properties[Property.LB];
+  public setIncrement(point: Point): void {
+    const ps = pointTo(point);
+    const properties = this.tree.properties;
+    const LB = properties[Property.LB];
 
-  //   let next = 1;
-  //   if (LB != null) {
-  //     const nums = LB.filter((v) => {
-  //       return !isNaN(v.split(":")[1] as any);
-  //     });
-  //     if (nums.length > 0) {
-  //       const last = nums
-  //         .map((v) => Number(v.split(":")[1]))
-  //         .sort((a, b) => a - b)[nums.length - 1];
-  //       next = Number(last) + 1;
-  //     }
-  //   }
+    let next = 1;
+    if (LB != null) {
+      const nums = LB.filter((v) => {
+        return !isNaN(v.split(":")[1] as any);
+      });
+      if (nums.length > 0) {
+        const last = nums
+          .map((v) => Number(v.split(":")[1]))
+          .sort((a, b) => a - b)[nums.length - 1];
+        next = Number(last) + 1;
+      }
+    }
 
-  //   this.setProp(Property.LB, ps + ":" + next.toString());
-  // }
+    this.setProp(Property.LB, ps + ":" + next.toString());
+  }
 
   /**
    * 置石をセットする
