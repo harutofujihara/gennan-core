@@ -196,6 +196,10 @@ class GennanCore {
     return this.board.teban;
   }
 
+  get phase(): Number {
+    return this.board.phase;
+  }
+
   get fixedStones(): Array<Stone> {
     const stones: Array<Stone> = [];
     const blacks = this.tree.rootProperties[Property.AB];
