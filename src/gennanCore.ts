@@ -287,6 +287,12 @@ class GennanCore {
     });
   }
 
+  public clone(): GennanCore {
+    const cloned = GennanCore.createFromSgf(this.sgf);
+    cloned.playToPath(this.currentPath);
+    return cloned;
+  }
+
   public playForward(idx = 0): void {
     if (this.tree.atLeaf()) throw new Error("There are not next moves.");
     if (!this.tree.nextNodes[idx]) throw new Error("Move index is invalid.");

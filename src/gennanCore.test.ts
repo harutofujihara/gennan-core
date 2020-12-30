@@ -115,3 +115,21 @@ test("set increment", () => {
   expect(gc.viewBoard[0][0].text).toBe("1");
   expect(gc.viewBoard[1][1].text).toBe("2");
 });
+
+test("viewBoard reactivity", () => {
+  const gc = GennanCore.createFromSgf(
+    "(;SZ[19]PB[芝野虎丸]PW[余正麒]AB[ab][cd];B[aa];W[bb])"
+  );
+  // forward
+  expect(gc.viewBoard[0][0].color).toEqual(undefined);
+  gc.playForward();
+  expect(gc.viewBoard[0][0].color).toEqual(Color.Black);
+
+  // set circle
+  let viewBoard;
+  viewBoard = gc.viewBoard;
+  expect(viewBoard[1][1].circle).toBeFalsy();
+  gc.setCircle({ x: 2, y: 2 });
+  viewBoard = gc.viewBoard;
+  expect(viewBoard[1][1].circle).toBeTruthy();
+});
