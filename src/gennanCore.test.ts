@@ -133,3 +133,17 @@ test("viewBoard reactivity", () => {
   viewBoard = gc.viewBoard;
   expect(viewBoard[1][1].circle).toBeTruthy();
 });
+
+test("clone", () => {
+  const gc = GennanCore.createFromSgf(
+    "(;SZ[19]PB[芝野虎丸]PW[余正麒]AB[ab][cd];B[bc];W[bb])"
+  );
+  expect(gc.viewBoard[0][0].color).toEqual(undefined);
+  gc.addFixedStone({ point: { x: 1, y: 1 }, color: Color.Black });
+  expect(gc.viewBoard[0][0].color).toEqual(Color.Black);
+  gc.playForward();
+  expect(gc.viewBoard[0][0].color).toEqual(Color.Black);
+
+  const newGc = gc.clone();
+  expect(newGc.viewBoard[0][0].color).toEqual(Color.Black);
+});

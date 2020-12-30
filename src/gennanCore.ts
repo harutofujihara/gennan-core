@@ -306,7 +306,10 @@ class GennanCore {
   public playToPath(path_: TreePath): void {
     // 初期化
     this.tree = toTree(this.sgf);
-    this.board = new Board({});
+    this.board = new Board({
+      gridNum: this.gridNum,
+      fixedStones: this.fixedStones,
+    });
 
     // 移動
     const path = [...path_];
