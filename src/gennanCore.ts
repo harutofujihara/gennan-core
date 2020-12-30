@@ -9,6 +9,8 @@ import {
   addProperty,
   Property,
   removeProperty,
+  MarkupSymbol,
+  markupSymbolToProperty,
 } from "./types";
 import { Tree, TreePath, pointTo, toPoint, toTree, nodeToMove } from "./sgf";
 import { Board } from "./rule";
@@ -356,68 +358,15 @@ class GennanCore {
     this.tree.setRootProps(newProps);
   }
 
-  public setCircle(point: Point): void {
-    this.setProp(Property.CR, pointTo(point));
+  public setSymbol(point: Point, symbol: MarkupSymbol): void {
+    this.setProp(markupSymbolToProperty(symbol), pointTo(point));
   }
-  public removeCircle(point: Point): void {
-    this.removeProp(Property.CR, pointTo(point));
-  }
-  public setSquare(point: Point): void {
-    this.setProp(Property.SQ, pointTo(point));
-  }
-  public removeSquare(point: Point): void {
-    this.removeProp(Property.SQ, pointTo(point));
-  }
-  public setTriangle(point: Point): void {
-    this.setProp(Property.TR, pointTo(point));
-  }
-  public removeTriangle(point: Point): void {
-    this.removeProp(Property.TR, pointTo(point));
-  }
-  public setCross(point: Point): void {
-    this.setProp(Property.MA, pointTo(point));
-  }
-  public removeCross(point: Point): void {
-    this.removeProp(Property.MA, pointTo(point));
+  public removeSymbol(point: Point, symbol: MarkupSymbol): void {
+    this.removeProp(markupSymbolToProperty(symbol), pointTo(point));
   }
 
-  public setAlpha(point: Point): void {
-    const ps = pointTo(point);
-    const properties = this.tree.properties;
-    const LB = properties[Property.LB];
-
-    let next = "A";
-    if (LB != null) {
-      const regex = /[^a-z]/gi; // a-z(lower,upperは無視)以外の文字が含まれているか判定する正規表現
-      const alphas = LB.filter((v) => !v.slice(-1).match(regex));
-      if (alphas.length > 0) {
-        const last = alphas.map((v) => v.slice(-1)).sort()[alphas.length - 1];
-        next = nextAlpha(last).toUpperCase();
-      }
-    }
-
-    this.setProp(Property.LB, ps + ":" + next);
-  }
-
-  public setIncrement(point: Point): void {
-    const ps = pointTo(point);
-    const properties = this.tree.properties;
-    const LB = properties[Property.LB];
-
-    let next = 1;
-    if (LB != null) {
-      const nums = LB.filter((v) => {
-        return !isNaN(v.split(":")[1] as any);
-      });
-      if (nums.length > 0) {
-        const last = nums
-          .map((v) => Number(v.split(":")[1]))
-          .sort((a, b) => a - b)[nums.length - 1];
-        next = Number(last) + 1;
-      }
-    }
-
-    this.setProp(Property.LB, ps + ":" + next.toString());
+  public setText(point: Point, text: string): void {
+    this.setProp(Property.LB, pointTo(point) + ":" + text);
   }
 
   public removeText(point: Point): void {
@@ -433,6 +382,45 @@ class GennanCore {
     // 更新
     this.tree.setProps(properties);
   }
+
+  // public setAlpha(point: Point): void {
+  //   const ps = pointTo(point);
+  //   const properties = this.tree.properties;
+  //   const LB = properties[Property.LB];
+
+  //   let next = "A";
+  //   if (LB != null) {
+  //     const regex = /[^a-z]/gi; // a-z(lower,upperは無視)以外の文字が含まれているか判定する正規表現
+  //     const alphas = LB.filter((v) => !v.slice(-1).match(regex));
+  //     if (alphas.length > 0) {
+  //       const last = alphas.map((v) => v.slice(-1)).sort()[alphas.length - 1];
+  //       next = nextAlpha(last).toUpperCase();
+  //     }
+  //   }
+
+  //   this.setProp(Property.LB, ps + ":" + next);
+  // }
+
+  // public setIncrement(point: Point): void {
+  //   const ps = pointTo(point);
+  //   const properties = this.tree.properties;
+  //   const LB = properties[Property.LB];
+
+  //   let next = 1;
+  //   if (LB != null) {
+  //     const nums = LB.filter((v) => {
+  //       return !isNaN(v.split(":")[1] as any);
+  //     });
+  //     if (nums.length > 0) {
+  //       const last = nums
+  //         .map((v) => Number(v.split(":")[1]))
+  //         .sort((a, b) => a - b)[nums.length - 1];
+  //       next = Number(last) + 1;
+  //     }
+  //   }
+
+  //   this.setProp(Property.LB, ps + ":" + next.toString());
+  // }
 
   /**
    * 置石をセットする
