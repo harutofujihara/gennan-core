@@ -6,18 +6,11 @@ import {
   Point,
   PointState,
   Stone,
-} from "./types";
-import {
-  Tree,
-  TreePath,
-  pointTo,
-  toPoint,
-  toTree,
-  nodeToMove,
   addProperty,
   Property,
   removeProperty,
-} from "./sgf";
+} from "./types";
+import { Tree, TreePath, pointTo, toPoint, toTree, nodeToMove } from "./sgf";
 import { Board } from "./rule";
 import { nextAlpha } from "./utils";
 

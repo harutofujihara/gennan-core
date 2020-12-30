@@ -1,13 +1,7 @@
 import { randmStr } from "../utils";
-import {
-  Node,
-  RootNode,
-  InternalNode,
-  Properties,
-  cloneNode,
-  cloneProperties,
-} from "./";
+import { Node, RootNode, InternalNode, cloneNode } from "./";
 import { propertiesToSgf } from "./stringifier";
+import { Properties, cloneProperties } from "../types";
 
 // [0]             equals '0'
 // [1]             equals '1'

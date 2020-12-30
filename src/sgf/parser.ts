@@ -1,14 +1,7 @@
-import { Point } from "../types";
+import { Point, Property, Properties, isProperty } from "../types";
 import { assertIsDefined, randmStr } from "../utils";
 import { Tree } from "./tree";
-import {
-  Node,
-  RootNode,
-  InternalNode,
-  Property,
-  Properties,
-  isProperty,
-} from "./node";
+import { Node, RootNode, InternalNode } from "./node";
 
 class SGFFormatError extends Error {
   constructor(message?: string) {

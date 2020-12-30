@@ -1,4 +1,4 @@
-import { Properties } from "../sgf";
+import { Properties } from "../types";
 
 export function propertiesToSgf(props: Properties): string {
   let sgf = ";";
