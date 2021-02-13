@@ -89,9 +89,7 @@ class Tree {
     loop(this._currentNode);
     return path;
   }
-  // 下verの方が速度が早いかと思い一度修正したが、これだと
-  // gennanのuseEffectでgnc.currentPathをobserveした時に
-  // 無限リロードされるようになってしまったので戻した
+  // あまり速度に違いは見られなかった
   // public getCurrentPath(): TreePath {
   //   if (this._currentNode == null) return [];
   //   const path: TreePath = [];
