@@ -78,19 +78,38 @@ class Tree {
     const path: TreePath = [];
     const loop = (node: Node): void => {
       if (node.isRoot()) {
-        path.push(0);
+        path.unshift(0);
       }
       if (node.isInternal()) {
-        path.push(node.parent.children.findIndex((rn) => rn.id === node.id));
+        path.unshift(node.parent.children.findIndex((rn) => rn.id === node.id));
         loop(node.parent);
       }
     };
 
     loop(this._currentNode);
-
-    const reversed = path.reverse();
-    return reversed;
+    return path;
   }
+  // 下verの方が速度が早いかと思い一度修正したが、これだと
+  // gennanのuseEffectでgnc.currentPathをobserveした時に
+  // 無限リロードされるようになってしまったので戻した
+  // public getCurrentPath(): TreePath {
+  //   if (this._currentNode == null) return [];
+  //   const path: TreePath = [];
+  //   const loop = (node: Node): void => {
+  //     if (node.isRoot()) {
+  //       path.push(0);
+  //     }
+  //     if (node.isInternal()) {
+  //       path.push(node.parent.children.findIndex((rn) => rn.id === node.id));
+  //       loop(node.parent);
+  //     }
+  //   };
+
+  //   loop(this._currentNode);
+
+  //   const reversed = path.reverse();
+  //   return reversed;
+  // }
 
   public createChildNode(properties: Properties): InternalNode {
     return new InternalNode({
