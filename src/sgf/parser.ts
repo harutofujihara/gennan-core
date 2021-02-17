@@ -115,10 +115,19 @@ function toProperties(nodeSgf: string): Properties {
     if (!isProperty(result[0])) throw new Error(); // Propertyが正しい値かどうか
     properties[result[0]] = [];
 
-    const regexp2 = new RegExp("(?<=\\[).*?(?=])", "g");
-    const result2 = p.match(regexp2);
-    assertIsDefined(result2);
-    result2.map((r) => properties[result[0] as Property]?.push(r));
+    // 後読みがSafariなど一部の環境でエラーになる
+    // const regexp2 = new RegExp("(?<=\\[).*?(?=])", "g");
+    // const result2 = p.match(regexp2);
+    // assertIsDefined(result2);
+    // result2.map((r) => properties[result[0] as Property]?.push(r));
+
+    // ので、正規表現を一旦諦めてシンプルなsplitで対応
+    const splittedProperty = p.split("[");
+    const propKey = splittedProperty[0];
+    assertIsDefined(propKey);
+    splittedProperty
+      .slice(1)
+      .map((sp) => properties[propKey as Property]?.push(sp.slice(0, -1)));
   });
 
   return properties;
