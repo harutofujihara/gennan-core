@@ -13,6 +13,10 @@ test("TreePath to pathString", () => {
   ans = "0";
   expect(toPathString(path)).toEqual(ans);
 
+  path = [0, 0, 0, 0, 0, 0];
+  ans = "0+";
+  expect(toPathString(path)).toEqual(ans);
+
   path = [0, 1, 2, 0, 2, 2, 2];
   ans = "0.1.2.0.2:3";
   expect(toPathString(path)).toEqual(ans);
@@ -33,6 +37,10 @@ test("PathString to TreePath", () => {
 
   pathString = "0";
   treePath = [0];
+  expect(toTreePath(pathString)).toEqual(treePath);
+
+  pathString = "0+";
+  treePath = new Array(501).fill(0);
   expect(toTreePath(pathString)).toEqual(treePath);
 
   pathString = "0.1.2.0.2:3";

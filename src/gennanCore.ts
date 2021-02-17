@@ -289,7 +289,8 @@ class GennanCore {
   }
 
   public playForward(idx = 0): void {
-    if (this.tree.atLeaf()) throw new Error("There are not next moves.");
+    // if (this.tree.atLeaf()) throw new Error("There are not next moves.");
+    if (this.tree.atLeaf()) return;
     if (!this.tree.nextNodes[idx]) throw new Error("Move index is invalid.");
 
     this.board.takeMove(nodeToMove(this.tree.nextNodes[idx]));

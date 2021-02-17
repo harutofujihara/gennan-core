@@ -20,8 +20,10 @@ export function toPathString(path: TreePath): string {
       // 末尾の要素の場合は追加する必要がある
       if (i === path.length - 1) {
         if (path[i] === 0) {
-          // 末尾の "0." を取り除いて "+" を追加
-          pathStr = pathStr.slice(0, -2) + "+";
+          // (先頭でない場合)末尾の "0." を取り除く
+          if (2 < pathStr.length) pathStr = pathStr.slice(0, -2);
+          // "+"を追加
+          pathStr += "+";
         } else {
           pathStr = pathStr + ":" + (count + 2);
         }
