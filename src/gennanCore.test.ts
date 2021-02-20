@@ -62,12 +62,12 @@ test("create from gridnum", () => {
   expect(gc.nextMoveOptions.length).toBe(0);
 });
 
-test("playToPath", () => {
+test("setFromInitPath", () => {
   const gc = GennanCore.createFromSgf(
     "(;SZ[19]PB[芝野虎丸]PW[余正麒]AB[ab][cd](;B[jj]CR[aa][bb]TR[aa];W[ii])(;B[ij];W[hi]))"
   );
 
-  gc.playToPath([0, 1, 0]);
+  gc.setFromInitPath([1, 0]);
   expect(gc.viewBoard[7][8].current).toBeTruthy();
 });
 
