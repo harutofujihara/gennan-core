@@ -74,12 +74,8 @@ class Tree {
    * get treepath of current node
    */
   public getCurrentPath(): TreePath {
-    if (this._currentNode == null) return [];
     const path: TreePath = [];
     const loop = (node: Node): void => {
-      if (node.isRoot()) {
-        path.unshift(0);
-      }
       if (node.isInternal()) {
         path.unshift(node.parent.children.findIndex((rn) => rn.id === node.id));
         loop(node.parent);
@@ -94,9 +90,6 @@ class Tree {
   //   if (this._currentNode == null) return [];
   //   const path: TreePath = [];
   //   const loop = (node: Node): void => {
-  //     if (node.isRoot()) {
-  //       path.push(0);
-  //     }
   //     if (node.isInternal()) {
   //       path.push(node.parent.children.findIndex((rn) => rn.id === node.id));
   //       loop(node.parent);

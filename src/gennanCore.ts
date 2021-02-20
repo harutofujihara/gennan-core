@@ -284,13 +284,12 @@ class GennanCore {
 
   public clone(): GennanCore {
     const cloned = GennanCore.createFromSgf(this.sgf);
-    cloned.playToPath(this.currentPath);
+    cloned.setFromInitPath(this.currentPath);
     return cloned;
   }
 
   public playForward(idx = 0): void {
-    // if (this.tree.atLeaf()) throw new Error("There are not next moves.");
-    if (this.tree.atLeaf()) return;
+    if (!this.existsNextMove()) throw new Error("There are not next moves.");
     if (!this.tree.nextNodes[idx]) throw new Error("Move index is invalid.");
 
     this.board.takeMove(nodeToMove(this.tree.nextNodes[idx]));
@@ -304,19 +303,19 @@ class GennanCore {
     this.tree.up();
   }
 
-  public playToPath(path_: TreePath): void {
-    // 初期化
+  public setFromInitPath(initPath: TreePath): void {
+    // initialize
     this.tree = toTree(this.sgf);
     this.board = new Board({
       gridNum: this.gridNum,
       fixedStones: this.fixedStones,
     });
+    this.setFromFragment(initPath);
+  }
 
-    // 移動
-    const path = [...path_];
-    if (path.length > 0) path.shift(); // 最初がrootNode
-    while (path.length > 0) {
-      this.playForward(path.shift());
+  public setFromFragment(path: TreePath): void {
+    for (let i = 0; i < path.length; i++) {
+      if (this.existsNextMove()) this.playForward(path[i]);
     }
   }
 
@@ -338,7 +337,7 @@ class GennanCore {
   }
 
   public existsNextMove(): boolean {
-    return this.tree.nextNodes.length > 0;
+    return !this.tree.atLeaf();
   }
   public existsBackMove(): boolean {
     return !this.tree.atRoot();
