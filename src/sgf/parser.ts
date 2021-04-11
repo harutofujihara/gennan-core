@@ -114,9 +114,9 @@ function toProperties(nodeSgf: string): Properties {
     const regexp = new RegExp("(.*?)(?=\\[)", "g");
     const result = p.match(regexp);
     console.log(result);
-    assertIsDefined(result);
-    if (!isProperty(result[0])) throw new Error(); // Propertyが正しい値かどうか
-    properties[result[0]] = [];
+    // assertIsDefined(result);
+    if (result && !isProperty(result[0])) throw new Error(); // Propertyが正しい値かどうか
+    if (result && result[0]) properties[result[0] as Property] = [];
 
     // 後読みがSafariなど一部の環境でエラーになる
     // const regexp2 = new RegExp("(?<=\\[).*?(?=])", "g");
