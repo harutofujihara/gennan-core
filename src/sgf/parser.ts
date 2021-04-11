@@ -106,6 +106,7 @@ function toNode(sgf: string, parent?: Node): Node {
 function toProperties(nodeSgf: string): Properties {
   const regexp = new RegExp("(.*?])(?=[A-Z])|(.*?])$", "gs"); // '.'を改行文字にマッチさせるにはは、\sフラグが必要
   const props = nodeSgf.match(regexp);
+  console.log(props);
   assertIsDefined(props);
   const properties: Properties = {};
 

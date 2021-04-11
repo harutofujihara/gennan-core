@@ -1,8 +1,7 @@
 import { toProperties, toTree } from "./parser";
 test("toProperties", () => {
   expect(
-    toProperties(`SZ[19]PB[芝野虎丸]PW[余正麒]AB[ab][cd]C[te
-st]`)
+    toProperties(`SZ[19]PB[芝野虎丸]PW[余正麒]AB[ab][cd]C[te\nst]`)
   ).toEqual({
     SZ: ["19"],
     PB: ["芝野虎丸"],
