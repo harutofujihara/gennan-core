@@ -110,8 +110,9 @@ function toProperties(nodeSgf: string): Properties {
   const properties: Properties = {};
 
   props.map((p) => {
-    const regexp = new RegExp("(.*?)(?=\\[)", "gs");
+    const regexp = new RegExp("(.*?)(?=\\[)", "g");
     const result = p.match(regexp);
+    console.log(result);
     assertIsDefined(result);
     if (!isProperty(result[0])) throw new Error(); // Propertyが正しい値かどうか
     properties[result[0]] = [];
@@ -125,7 +126,8 @@ function toProperties(nodeSgf: string): Properties {
     // ので、正規表現を一旦諦めてシンプルなsplitで対応
     const splittedProperty = p.split("[");
     const propKey = splittedProperty[0];
-    assertIsDefined(propKey);
+    // assertIsDefined(propKey);
+
     splittedProperty
       .slice(1)
       .map((sp) => properties[propKey as Property]?.push(sp.slice(0, -1)));
