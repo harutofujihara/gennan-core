@@ -104,7 +104,9 @@ function toNode(sgf: string, parent?: Node): Node {
 
 // SZ[19]PB[芝野虎丸]PW[余正麒]AB[ab][cd] => {SZ: ["19"], PB: ["芝野虎丸"], PW: ["余正麒"], AB: ["ab", "cd"]}
 function toProperties(nodeSgf: string): Properties {
-  const regexp = new RegExp("(.*?])(?=[A-Z])|(.*?])$", "gs"); // '.'を改行文字にマッチさせるにはは、\sフラグが必要
+  // const regexp = new RegExp("(.*?])(?=[A-Z])|(.*?])$", "g"); // '.'を改行文字にマッチさせるにはは、\sフラグが必要
+  const regexp = new RegExp("([\\s\\S]*?])(?=[A-Z])|([\\s\\S]*?])$", "g"); // '.'を改行文字にマッチさせるにはは、\sフラグが必要
+
   const props = nodeSgf.match(regexp);
   console.log(props);
   assertIsDefined(props);
