@@ -104,19 +104,16 @@ function toNode(sgf: string, parent?: Node): Node {
 
 // SZ[19]PB[芝野虎丸]PW[余正麒]AB[ab][cd] => {SZ: ["19"], PB: ["芝野虎丸"], PW: ["余正麒"], AB: ["ab", "cd"]}
 function toProperties(nodeSgf: string): Properties {
-  const regexp = new RegExp("(.*?])(?=[A-Z])|(.*?])$", "gs"); // '.'を改行文字にマッチさせるにはは、\sフラグが必要
+  const regexp = new RegExp("(.*?])(?=[A-Z])|(.*?])$", "gs");
   const props = nodeSgf.match(regexp);
-  console.log(props);
-  // assertIsDefined(props);
+  assertIsDefined(props);
   const properties: Properties = {};
-
-  props?.map((p) => {
+  props.map((p) => {
     const regexp = new RegExp("(.*?)(?=\\[)", "g");
     const result = p.match(regexp);
-    console.log(result);
-    // assertIsDefined(result);
-    if (result && !isProperty(result[0])) throw new Error(); // Propertyが正しい値かどうか
-    if (result && result[0]) properties[result[0] as Property] = [];
+    assertIsDefined(result);
+    if (!isProperty(result[0])) throw new Error(); // Propertyが正しい値かどうか
+    properties[result[0]] = [];
 
     // 後読みがSafariなど一部の環境でエラーになる
     // const regexp2 = new RegExp("(?<=\\[).*?(?=])", "g");
@@ -127,8 +124,7 @@ function toProperties(nodeSgf: string): Properties {
     // ので、正規表現を一旦諦めてシンプルなsplitで対応
     const splittedProperty = p.split("[");
     const propKey = splittedProperty[0];
-    // assertIsDefined(propKey);
-
+    assertIsDefined(propKey);
     splittedProperty
       .slice(1)
       .map((sp) => properties[propKey as Property]?.push(sp.slice(0, -1)));
