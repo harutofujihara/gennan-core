@@ -110,7 +110,7 @@ function toProperties(nodeSgf: string): Properties {
   const properties: Properties = {};
 
   props.map((p) => {
-    const regexp = new RegExp("(.*?)(?=\\[)", "g");
+    const regexp = new RegExp("(.*?)(?=\\[)", "gs");
     const result = p.match(regexp);
     assertIsDefined(result);
     if (!isProperty(result[0])) throw new Error(); // Propertyが正しい値かどうか
