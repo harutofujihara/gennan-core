@@ -169,3 +169,20 @@ test("clone", () => {
 //     expect(gc2.currentPath).toEqual(new Array(150).fill(0));
 //   }
 // });
+
+test("snapshot sgf", () => {
+  const initSnapshotSgf = "(;SZ[19]PB[芝野虎丸]PW[余正麒]AB[ab][cd]AW[gg])";
+  const sgf = "(;SZ[19]PB[芝野虎丸]PW[余正麒]AB[ab][cd]AW[gg];B[bc];W[bb])";
+  const advancedSnapshotSgf =
+    "(;SZ[19]PB[芝野虎丸]PW[余正麒]AB[ab][cd][bc]AW[gg][bb])";
+  const gc = GennanCore.createFromSgf(sgf);
+
+  // 最初は置き石だけ
+  expect(gc.snapshotSgf).toEqual(initSnapshotSgf);
+
+  // 手を進めた後に再びスナップショットを取得して確認
+  gc.playForward();
+  gc.playForward();
+
+  expect(gc.snapshotSgf).toEqual(advancedSnapshotSgf);
+});
