@@ -11,8 +11,18 @@ import {
   removeProperty,
   MarkupSymbol,
   markupSymbolToProperty,
+  cloneProperties,
 } from "./types";
-import { Tree, TreePath, pointTo, toPoint, toTree, nodeToMove } from "./sgf";
+import {
+  Tree,
+  TreePath,
+  pointTo,
+  toPoint,
+  toTree,
+  nodeToMove,
+  cloneNode,
+  propertiesToSgf,
+} from "./sgf";
 import { Board } from "./rule";
 import { nextAlpha } from "./utils";
 
@@ -163,6 +173,26 @@ class GennanCore {
 
   get sgf(): string {
     return this.tree.toSgf();
+  }
+
+  get snapshotSgf(): string {
+    const clonedRootProperties = cloneProperties(this.tree.rootNode.properties);
+    let newProps = clonedRootProperties;
+    const gridNum = this.board.boardState.length;
+    for (let x = 0; x < gridNum; x++) {
+      for (let y = 0; y < gridNum; y++) {
+        if (this.board.boardState[x][y] === PointState.Black) {
+          newProps = addProperty(newProps, Property.AB, pointTo({ x, y }));
+        }
+        if (this.board.boardState[x][y] === PointState.White) {
+          newProps = addProperty(newProps, Property.AW, pointTo({ x, y }));
+        }
+      }
+    }
+
+    const sgf = propertiesToSgf(newProps);
+
+    return "(" + sgf + ")";
   }
 
   get currentPath(): TreePath {
