@@ -13,6 +13,14 @@ test("node to sgf", () => {
   );
 });
 
+test("値がないPropertyはsgfに追加しない", () => {
+  const props = {
+    SZ: ["19"],
+    C: [],
+  };
+  expect(propertiesToSgf(props)).toBe(";SZ[19]");
+});
+
 test("tree to sgf", () => {
   const sgf =
     "(;SZ[19]PB[芝野虎丸]PW[余正麒]AB[ab][cd](;B[jj];W[ii])(;B[ij];W[hi]))";
