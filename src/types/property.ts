@@ -1,3 +1,5 @@
+import { isUpperCase } from "../utils";
+
 const Property = {
   B: "B",
   W: "W",
@@ -30,11 +32,20 @@ const Property = {
   LT: "LT",
   LC: "LC",
   GK: "GK",
+  OT: "OT",
+  RU: "RU",
+  PL: "PL",
+  MULTIGOGM: "MULTIGOGM",
+  KGSDE: "KGSDE",
+  KGSSB: "KGSSB",
+  KGSSW: "KGSSW",
 } as const;
-type Property = typeof Property[keyof typeof Property];
+type Property = typeof Property[keyof typeof Property] | string;
 
 function isProperty(str: string): str is Property {
-  return Object.values(Property).indexOf(str as any) !== -1;
+  // 値の種類が膨大なので大文字かどうかだけ判定する
+  return isUpperCase(str);
+  // return Object.values(Property).indexOf(str as any) !== -1;
 }
 
 type Properties = { [key in Property]?: Array<string> };

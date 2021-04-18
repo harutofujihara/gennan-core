@@ -23,3 +23,6 @@ export function nextAlpha(s: string): string {
 export function randmStr(): string {
   return Math.random().toString(32).substring(2);
 }
+export function isUpperCase(c: string): boolean {
+  return /^[A-Z]+$/g.test(c);
+}
