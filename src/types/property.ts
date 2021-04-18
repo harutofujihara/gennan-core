@@ -20,6 +20,7 @@ const Property = {
   BR: "BR",
   WR: "WR",
   RE: "RE",
+  DT: "DT",
 } as const;
 type Property = typeof Property[keyof typeof Property];
 
