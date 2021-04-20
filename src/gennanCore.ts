@@ -176,6 +176,7 @@ class GennanCore {
   }
 
   get snapshotSgf(): string {
+    // stones
     const clonedRootProperties = cloneProperties(this.tree.rootNode.properties);
     let newProps = clonedRootProperties;
     const gridNum = this.board.boardState.length;
@@ -189,6 +190,23 @@ class GennanCore {
         }
       }
     }
+
+    // markups
+    this.tree.properties[Property.CR]?.map((cp) => {
+      newProps = addProperty(newProps, Property.CR, cp);
+    });
+    this.tree.properties[Property.TR]?.map((tp) => {
+      newProps = addProperty(newProps, Property.TR, tp);
+    });
+    this.tree.properties[Property.SQ]?.map((sp) => {
+      newProps = addProperty(newProps, Property.SQ, sp);
+    });
+    this.tree.properties[Property.MA]?.map((map) => {
+      newProps = addProperty(newProps, Property.MA, map);
+    });
+    this.tree.properties[Property.LB]?.map((lbp) => {
+      newProps = addProperty(newProps, Property.LB, lbp);
+    });
 
     const sgf = propertiesToSgf(newProps);
 
