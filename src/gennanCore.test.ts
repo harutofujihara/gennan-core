@@ -172,9 +172,10 @@ test("clone", () => {
 
 test("snapshot sgf", () => {
   const initSnapshotSgf = "(;SZ[19]PB[芝野虎丸]PW[余正麒]AB[ab][cd]AW[gg])";
-  const sgf = "(;SZ[19]PB[芝野虎丸]PW[余正麒]AB[ab][cd]AW[gg];B[bc];W[bb])";
+  const sgf =
+    "(;SZ[19]PB[芝野虎丸]PW[余正麒]AB[ab][cd]AW[gg];B[bc];W[bb]CR[dd]LB[ee:A])";
   const advancedSnapshotSgf =
-    "(;SZ[19]PB[芝野虎丸]PW[余正麒]AB[ab][cd][bc]AW[gg][bb])";
+    "(;SZ[19]PB[芝野虎丸]PW[余正麒]AB[ab][cd][bc]AW[gg][bb]CR[dd]LB[ee:A])";
   const gc = GennanCore.createFromSgf(sgf);
 
   // 最初は置き石だけ
