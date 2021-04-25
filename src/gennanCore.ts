@@ -297,17 +297,46 @@ class GennanCore {
     this.setRootProp(Property.PW, whitePlayer);
   }
 
-  get komi(): number | undefined {
+  get komi(): string | undefined {
     const km = this.tree.rootProperties[Property.KM];
     if (km != null) {
-      return Number(km[0]);
+      return km[0];
     }
   }
-  public setKomi(komi: number): void {
+
+  public setKomi(komi: string): void {
     if (this.komi != null) {
-      this.removeRootProp(Property.KM, this.komi.toString());
+      this.removeRootProp(Property.KM, this.komi);
     }
-    this.setRootProp(Property.KM, komi.toString());
+    this.setRootProp(Property.KM, komi);
+  }
+
+  get gameDate(): string | undefined {
+    const date = this.tree.rootProperties[Property.DT];
+    if (date != null) {
+      return date[0];
+    }
+  }
+
+  public setGameDate(date: string): void {
+    if (this.gameDate != null) {
+      this.removeRootProp(Property.DT, this.gameDate);
+    }
+    this.setRootProp(Property.DT, date);
+  }
+
+  get gameResult(): string | undefined {
+    const result = this.tree.rootProperties[Property.RE];
+    if (result != null) {
+      return result[0];
+    }
+  }
+
+  public setGameResult(result: string): void {
+    if (this.gameResult != null) {
+      this.removeRootProp(Property.RE, this.gameResult);
+    }
+    this.setRootProp(Property.RE, result);
   }
 
   get comment(): string | undefined {
