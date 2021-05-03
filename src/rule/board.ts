@@ -108,7 +108,7 @@ class Board {
   }
 
   public takeMove(move: Move): void {
-    if (this.teban !== move.color) throw new Error("Teban color is invalid.");
+    // if (this.teban !== move.color) throw new Error("Teban color is invalid.");
     const prevKou = this._kou;
     const capturedStones: Array<Stone> = [];
     // パスでない場合
