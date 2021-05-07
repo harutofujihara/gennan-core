@@ -32,6 +32,7 @@ function toNode(sgf: string, parent?: Node): Node {
 
   const branchSgf =
     firstLeftBracketIdx !== -1 ? sgfStr.slice(0, firstLeftBracketIdx) : sgfStr;
+
   const nodeSgfs = branchSgf.split(";").filter((s) => s !== "");
 
   let top;
@@ -105,14 +106,19 @@ function toNode(sgf: string, parent?: Node): Node {
 // SZ[19]PB[芝野虎丸]PW[余正麒]AB[ab][cd] => {SZ: ["19"], PB: ["芝野虎丸"], PW: ["余正麒"], AB: ["ab", "cd"]}
 function toProperties(nodeSgf: string): Properties {
   const regexp = new RegExp("(.*?])(?=[A-Z])|(.*?])$", "gs");
-  const props = nodeSgf.match(regexp);
+  // const props = nodeSgf.match(regexp); nodeSgfの末尾に改行コードが含まれていたりした場合うまくいかない
+  const props = nodeSgf.trim().match(regexp);
+
   assertIsDefined(props);
   const properties: Properties = {};
   props.map((p) => {
     const regexp = new RegExp("(.*?)(?=\\[)", "g");
     const result = p.match(regexp);
+
     assertIsDefined(result);
+
     if (!isProperty(result[0])) throw new Error(); // Propertyが正しい値かどうか
+
     properties[result[0]] = [];
 
     // 後読みがSafariなど一部の環境でエラーになる
@@ -125,6 +131,7 @@ function toProperties(nodeSgf: string): Properties {
     const splittedProperty = p.split("[");
     const propKey = splittedProperty[0];
     assertIsDefined(propKey);
+
     splittedProperty
       .slice(1)
       .map((sp) => properties[propKey as Property]?.push(sp.slice(0, -1)));
