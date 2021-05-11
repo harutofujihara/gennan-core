@@ -17,6 +17,15 @@ class SGFFormatError extends Error {
 //   (;着手1b(;着手2ba;着手3ba;着手4ba)
 //           (;着手3bb)))
 
+function escapeSgfString(sgf: string): string {
+  return sgf
+    .replace(/\[.+?\]/g, "")
+    .replace(/\]/g, "\\[")
+    .replace(/\]/g, "\\]")
+    .replace(/\]/g, "\\(")
+    .replace(/\]/g, "\\)");
+}
+
 function toTree(sgf: string): Tree {
   const rootNode = toNode(sgf);
   return new Tree({ rootNode });
@@ -28,7 +37,22 @@ function toNode(sgf: string, parent?: Node): Node {
   const sgfStr = sgf.slice(1).slice(0, -1);
 
   // 親ノードを作成
-  const firstLeftBracketIdx = sgfStr.indexOf("(");
+  let firstLeftBracketIdx = -1;
+  let isInSquareBracket = false;
+  // const firstLeftBracketIdx = sgfStr.indexOf("(");
+  for (let i = 0; i < sgfStr.length; i++) {
+    if (sgfStr.charAt(i) === "[") isInSquareBracket = true;
+    if (sgfStr.charAt(i) === "]") isInSquareBracket = false;
+    if (
+      sgfStr.charAt(i) === "(" &&
+      !isInSquareBracket
+      // (i === 0 && sgfStr.charAt(i) === "(") ||
+      // (sgfStr.charAt(i) === "(" && sgfStr.charAt(i - 1) !== "\\")
+    ) {
+      firstLeftBracketIdx = i;
+      break;
+    }
+  }
 
   const branchSgf =
     firstLeftBracketIdx !== -1 ? sgfStr.slice(0, firstLeftBracketIdx) : sgfStr;
@@ -68,13 +92,17 @@ function toNode(sgf: string, parent?: Node): Node {
   let leftBracketIdx = -1;
   let leftBracketCount = 0;
   let rightBracketCount = 0;
+  isInSquareBracket = false;
   for (let i = 0; i < sgfStr.length; i++) {
-    if (sgfStr.charAt(i) === "(") {
+    if (sgfStr.charAt(i) === "[") isInSquareBracket = true;
+    if (sgfStr.charAt(i) === "]") isInSquareBracket = false;
+
+    if (sgfStr.charAt(i) === "(" && !isInSquareBracket) {
       if (leftBracketIdx === -1) leftBracketIdx = i;
       leftBracketCount += 1;
     }
 
-    if (sgfStr.charAt(i) === ")") {
+    if (sgfStr.charAt(i) === ")" && !isInSquareBracket) {
       if (leftBracketIdx === -1) throw new SGFFormatError();
       rightBracketCount += 1;
       if (leftBracketCount === rightBracketCount) {
@@ -107,19 +135,20 @@ function toNode(sgf: string, parent?: Node): Node {
 function toProperties(nodeSgf: string): Properties {
   const regexp = new RegExp("(.*?])(?=[A-Z])|(.*?])$", "gs");
   // const props = nodeSgf.match(regexp); nodeSgfの末尾に改行コードが含まれていたりした場合うまくいかない
+
   const props = nodeSgf.trim().match(regexp);
 
   assertIsDefined(props);
   const properties: Properties = {};
   props.map((p) => {
-    const regexp = new RegExp("(.*?)(?=\\[)", "g");
-    const result = p.match(regexp);
+    // const regexp = new RegExp("(.*?)(?=\\[)", "g");
+    // const result = p.match(regexp);
 
-    assertIsDefined(result);
+    // assertIsDefined(result);
 
-    if (!isProperty(result[0])) throw new Error(); // Propertyが正しい値かどうか
+    // if (!isProperty(result[0])) throw new Error(); // Propertyが正しい値かどうか
 
-    properties[result[0]] = [];
+    // properties[result[0]] = [];
 
     // 後読みがSafariなど一部の環境でエラーになる
     // const regexp2 = new RegExp("(?<=\\[).*?(?=])", "g");
@@ -128,13 +157,32 @@ function toProperties(nodeSgf: string): Properties {
     // result2.map((r) => properties[result[0] as Property]?.push(r));
 
     // ので、正規表現を一旦諦めてシンプルなsplitで対応
-    const splittedProperty = p.split("[");
-    const propKey = splittedProperty[0];
-    assertIsDefined(propKey);
 
-    splittedProperty
-      .slice(1)
-      .map((sp) => properties[propKey as Property]?.push(sp.slice(0, -1)));
+    const propKey = p.slice(0, p.indexOf("["));
+    properties[propKey as Property] = [];
+
+    const valueStrs = p.slice(p.indexOf("["));
+    let buf = "";
+    let sBCount = 0;
+    for (var i = 0; i < valueStrs.length; i++) {
+      // valueの始まりのSquare Bracketなら次に進む
+      if (valueStrs.charAt(i) === "[") {
+        sBCount += 1;
+        if (sBCount === 1) continue;
+      }
+
+      // valueの終わりのSquare Bracketなら値を追加して次に進む
+      if (valueStrs.charAt(i) === "]") {
+        sBCount -= 1;
+        if (sBCount === 0) {
+          properties[propKey as Property]?.push(buf);
+          buf = "";
+          continue;
+        }
+      }
+
+      buf += valueStrs.charAt(i);
+    }
   });
 
   return properties;

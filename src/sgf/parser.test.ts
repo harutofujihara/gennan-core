@@ -16,7 +16,7 @@ st]`)
 
 test("toTree", () => {
   const tree = toTree(
-    "(;SZ[19]PB[芝野虎丸]PW[余正麒]AB[ab][cd](;B[jj];W[ii])(;B[ij];W[hi]))"
+    "(;SZ[19]PB[芝野虎丸]PW[余正麒]AB[ab][cd](;B[jj];W[ii])(;B[ij]C[te(s)A[a]t];W[hi]))"
   );
   expect(tree.rootProperties).toEqual({
     SZ: ["19"],
@@ -27,7 +27,8 @@ test("toTree", () => {
 
   // 1手目
   tree.down(1);
-  expect(tree.properties).toEqual({ B: ["ij"] });
+  expect(tree.properties).toEqual({ B: ["ij"], C: ["te(s)A[a]t"] });
+
   // // 親と子がの情報が一致しているか
   // expect(tree.node).toEqual(tree.nextNodes[0].parent);
 
@@ -91,4 +92,26 @@ test("各Propertyの値以外の場所で改行コードが含まれていた時
       ;W[jq];B[cs];W[aq];B[fs];W[ar];B[bs];W[as]CR[ap]C[○に白があるせいで攻め合いが負けになっている。]))
       (;B[ip]C[誰しも高く逃げる手を考えるところだ。左下に関してはAlphaGoにミスが目立つ。]))`
   );
+});
+
+test("toTree", () => {
+  const tree = toTree(
+    "(;SZ[19]PB[芝野虎丸]PW[余正麒]AB[ab][cd](;B[jj];W[ii])(;B[ij];W[hi]))"
+  );
+  expect(tree.rootProperties).toEqual({
+    SZ: ["19"],
+    PB: ["芝野虎丸"],
+    PW: ["余正麒"],
+    AB: ["ab", "cd"],
+  });
+
+  // 1手目
+  tree.down(1);
+  expect(tree.properties).toEqual({ B: ["ij"] });
+  // // 親と子がの情報が一致しているか
+  // expect(tree.node).toEqual(tree.nextNodes[0].parent);
+
+  // 2手目
+  tree.down();
+  expect(tree.properties).toEqual({ W: ["hi"] });
 });
