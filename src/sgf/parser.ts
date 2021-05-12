@@ -38,16 +38,11 @@ function toNode(sgf: string, parent?: Node): Node {
   // 親ノードを作成
   let firstLeftBracketIdx = -1;
   let isInSquareBracket = false;
-  // const firstLeftBracketIdx = sgfStr.indexOf("(");
+
   for (let i = 0; i < sgfStr.length; i++) {
     if (sgfStr.charAt(i) === "[") isInSquareBracket = true;
     if (sgfStr.charAt(i) === "]") isInSquareBracket = false;
-    if (
-      sgfStr.charAt(i) === "(" &&
-      !isInSquareBracket
-      // (i === 0 && sgfStr.charAt(i) === "(") ||
-      // (sgfStr.charAt(i) === "(" && sgfStr.charAt(i - 1) !== "\\")
-    ) {
+    if (sgfStr.charAt(i) === "(" && !isInSquareBracket) {
       firstLeftBracketIdx = i;
       break;
     }
@@ -157,26 +152,48 @@ function toProperties(nodeSgf: string): Properties {
 
     // ので、正規表現を一旦諦めてシンプルなsplitで対応
 
-    const propKey = p.slice(0, p.indexOf("["));
-    properties[propKey as Property] = [];
-
-    const valueStrs = p.slice(p.indexOf("["));
-    let buf = "";
+    let propKeyBuf = "";
+    let propKey: Property = "";
+    let valBuf = "";
     let isInSquareBracket = false;
-    for (var i = 0; i < valueStrs.length; i++) {
-      // valueの始まりのSquare Bracketなら次に進む
-      if (valueStrs.charAt(i) === "[" && !isInSquareBracket) {
+    for (var i = 0; i < p.length; i++) {
+      // set is in square bracket
+      if (p.charAt(i) === "[" && !isInSquareBracket) {
         isInSquareBracket = true;
+        continue;
       }
-      // valueの終わりのSquare Bracketなら値を追加して次に進む
-      else if (
-        valueStrs.charAt(i) === "]" &&
-        valueStrs.charAt(i - 1) !== "\\"
+
+      // set Property key
+      if (!isInSquareBracket) {
+        if (p.charAt(i).trim()) {
+          // 改行コードやスペースでない場合は、新たなPropertyブロックに入ったとみなす
+          propKey = "";
+          propKeyBuf += p.charAt(i);
+        }
+        continue;
+      }
+
+      if (
+        isInSquareBracket &&
+        p.charAt(i) === "]" &&
+        p.charAt(i - 1) !== "\\"
       ) {
-        properties[propKey as Property]?.push(buf);
-        buf = "";
+        if (!propKey) {
+          propKey = propKeyBuf.trim(); // 改行コードなどが入り込む可能性
+          propKeyBuf = "";
+        }
+
+        if (!properties[propKey]) {
+          properties[propKey] = [];
+        }
+        properties[propKey]?.push(valBuf);
+        valBuf = "";
+
         isInSquareBracket = false;
-      } else buf += valueStrs.charAt(i);
+        continue;
+      }
+
+      valBuf += p.charAt(i);
     }
   });
 
