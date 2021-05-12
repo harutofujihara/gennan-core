@@ -18,12 +18,11 @@ class SGFFormatError extends Error {
 //           (;着手3bb)))
 
 function escapeSgfString(sgf: string): string {
-  return sgf
-    .replace(/\[.+?\]/g, "")
-    .replace(/\]/g, "\\[")
-    .replace(/\]/g, "\\]")
-    .replace(/\]/g, "\\(")
-    .replace(/\]/g, "\\)");
+  return sgf.toString().replace(/]/g, "\\]");
+}
+
+function unescapeSgfString(sgf: string): string {
+  return sgf.toString().replace(/\\]/g, "]");
 }
 
 function toTree(sgf: string): Tree {
@@ -163,25 +162,21 @@ function toProperties(nodeSgf: string): Properties {
 
     const valueStrs = p.slice(p.indexOf("["));
     let buf = "";
-    let sBCount = 0;
+    let isInSquareBracket = false;
     for (var i = 0; i < valueStrs.length; i++) {
       // valueの始まりのSquare Bracketなら次に進む
-      if (valueStrs.charAt(i) === "[") {
-        sBCount += 1;
-        if (sBCount === 1) continue;
+      if (valueStrs.charAt(i) === "[" && !isInSquareBracket) {
+        isInSquareBracket = true;
       }
-
       // valueの終わりのSquare Bracketなら値を追加して次に進む
-      if (valueStrs.charAt(i) === "]") {
-        sBCount -= 1;
-        if (sBCount === 0) {
-          properties[propKey as Property]?.push(buf);
-          buf = "";
-          continue;
-        }
-      }
-
-      buf += valueStrs.charAt(i);
+      else if (
+        valueStrs.charAt(i) === "]" &&
+        valueStrs.charAt(i - 1) !== "\\"
+      ) {
+        properties[propKey as Property]?.push(buf);
+        buf = "";
+        isInSquareBracket = false;
+      } else buf += valueStrs.charAt(i);
     }
   });
 

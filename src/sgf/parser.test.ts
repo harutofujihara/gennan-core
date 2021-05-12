@@ -14,9 +14,9 @@ st]`)
   });
 });
 
-test("toTree", () => {
+test("toTree コメントに()や[]が含まれる", () => {
   const tree = toTree(
-    "(;SZ[19]PB[芝野虎丸]PW[余正麒]AB[ab][cd](;B[jj];W[ii])(;B[ij]C[te(s)A[a]t];W[hi]))"
+    `(;SZ[19]PB[芝野虎丸]PW[余正麒]AB[ab][cd](;B[jj];W[ii])(;B[ij]C[te(s)A[a\\]\\]\\]\\]t];W[hi]))`
   );
   expect(tree.rootProperties).toEqual({
     SZ: ["19"],
@@ -27,7 +27,10 @@ test("toTree", () => {
 
   // 1手目
   tree.down(1);
-  expect(tree.properties).toEqual({ B: ["ij"], C: ["te(s)A[a]t"] });
+  expect(tree.properties).toEqual({
+    B: ["ij"],
+    C: [`te(s)A[a\\]\\]\\]\\]t`],
+  });
 
   // // 親と子がの情報が一致しているか
   // expect(tree.node).toEqual(tree.nextNodes[0].parent);

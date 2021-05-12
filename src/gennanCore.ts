@@ -232,7 +232,8 @@ class GennanCore {
       const gn = Number(sz[0]);
       if (isGridNum(gn)) return gn;
     }
-    return this.board.gridNum;
+
+    return this.board ? this.board.gridNum : 19;
   }
 
   get teban(): Color {
