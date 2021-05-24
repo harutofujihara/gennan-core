@@ -57,7 +57,7 @@ test("test", () => {
   const gc = GennanCore.createFromSgf(sgf);
 
   let currentPath = gc.currentPath;
-  let initPath = toInitPathString(currentPath, !gc.existsNextMove());
+  let initPath = toInitPathString(currentPath, !gc.existsNextMove);
   expect(currentPath).toEqual([]);
   expect(initPath).toEqual("0");
 
@@ -70,7 +70,7 @@ test("test", () => {
   gc.playForward();
 
   currentPath = gc.currentPath;
-  initPath = toInitPathString(currentPath, !gc.existsNextMove());
+  initPath = toInitPathString(currentPath, !gc.existsNextMove);
 
   expect(currentPath).toEqual([0, 0, 0, 0, 1, 0, 0]);
   // expect(initPath).toEqual("4.1.0:2");
@@ -81,7 +81,7 @@ test("test", () => {
 
   gc2.setFromInitPath(parseInitialPath(initPath));
   currentPath = gc2.currentPath;
-  initPath = toInitPathString(currentPath, !gc2.existsNextMove());
+  initPath = toInitPathString(currentPath, !gc2.existsNextMove);
   expect(initPath).toEqual("4.1+");
   expect(gc2.viewBoard).toEqual(gc.viewBoard);
 });

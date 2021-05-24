@@ -159,6 +159,7 @@ class GennanCore {
 
     // next
     const nos = this.nextMoveOptions.filter((no) => no.move.point != null);
+
     if (nos.length > 0) {
       nos.map((no) => {
         if (no.move.point != null) {
@@ -360,6 +361,13 @@ class GennanCore {
     });
   }
 
+  get existsNextMove(): boolean {
+    return !this.tree.atLeaf();
+  }
+  get existsBackMove(): boolean {
+    return !this.tree.atRoot();
+  }
+
   public clone(): GennanCore {
     const cloned = GennanCore.createFromSgf(this.sgf);
     cloned.setFromInitPath(this.currentPath);
@@ -367,7 +375,7 @@ class GennanCore {
   }
 
   public playForward(idx = 0): void {
-    if (!this.existsNextMove()) throw new Error("There are not next moves.");
+    if (!this.existsNextMove) throw new Error("There are not next moves.");
     if (!this.tree.nextNodes[idx]) throw new Error("Move index is invalid.");
 
     this.board.takeMove(nodeToMove(this.tree.nextNodes[idx]));
@@ -393,7 +401,7 @@ class GennanCore {
 
   public setFromFragment(path: TreePath): void {
     for (let i = 0; i < path.length; i++) {
-      if (this.existsNextMove()) this.playForward(path[i]);
+      if (this.existsNextMove) this.playForward(path[i]);
     }
   }
 
@@ -408,17 +416,10 @@ class GennanCore {
 
   // 一手削除する
   public removeMove(): void {
-    if (this.existsBackMove()) {
+    if (this.existsBackMove) {
       this.tree.removeNode();
       this.board.undoMove();
     }
-  }
-
-  public existsNextMove(): boolean {
-    return !this.tree.atLeaf();
-  }
-  public existsBackMove(): boolean {
-    return !this.tree.atRoot();
   }
 
   private setProp(property: Property, sgf: string): void {
