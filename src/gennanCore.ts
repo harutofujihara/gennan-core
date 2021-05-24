@@ -381,12 +381,22 @@ class GennanCore {
     this.board.takeMove(nodeToMove(this.tree.nextNodes[idx]));
     this.tree.down(idx);
   }
+  public playForwardTimes(times = 10): void {
+    for (let i = 0; i < times; i++) {
+      if (this.existsNextMove) this.playForward();
+    }
+  }
 
   public playBackward(): void {
     if (this.tree.atRoot()) throw new Error("This is root now.");
 
     this.board.undoMove();
     this.tree.up();
+  }
+  public playBackwardTimes(times = 10): void {
+    for (let i = 0; i < times; i++) {
+      if (this.existsBackMove) this.playBackward();
+    }
   }
 
   public setFromInitPath(initPath: TreePath): void {
