@@ -381,9 +381,11 @@ class GennanCore {
     this.board.takeMove(nodeToMove(this.tree.nextNodes[idx]));
     this.tree.down(idx);
   }
-  public playForwardTimes(times = 10): void {
+  public playForwardTimes(times = 10, stopOnComment = true): void {
     for (let i = 0; i < times; i++) {
-      if (this.existsNextMove) this.playForward();
+      if (!this.existsNextMove) break;
+      this.playForward();
+      if (this.comment != null && stopOnComment) break;
     }
   }
 
@@ -393,9 +395,11 @@ class GennanCore {
     this.board.undoMove();
     this.tree.up();
   }
-  public playBackwardTimes(times = 10): void {
+  public playBackwardTimes(times = 10, stopOnComment = true): void {
     for (let i = 0; i < times; i++) {
-      if (this.existsBackMove) this.playBackward();
+      if (!this.existsBackMove) break;
+      this.playBackward();
+      if (this.comment != null && stopOnComment) break;
     }
   }
 
