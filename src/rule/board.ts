@@ -140,7 +140,7 @@ class Board {
       const capture = (p: Point): void => {
         if (
           clonedBoardState[p.x][p.y] === oppoColor &&
-          Board.isSurroundedByEnemy(p, clonedBoardState)
+          Board.isGroupSurroundedByEnemy(p, clonedBoardState)
         ) {
           // 石が取れたら重複を排除しつつ追加する
           Board.getConnectedStones(p, clonedBoardState).map((s) => {
@@ -258,7 +258,7 @@ class Board {
     clonedBoardState[point.x][point.y] = color;
 
     // - 置いた石が敵石に囲まれていなければ自殺手ではない
-    if (!Board.isSurroundedByEnemy(point, clonedBoardState)) {
+    if (!Board.isGroupSurroundedByEnemy(point, clonedBoardState)) {
       return false;
     }
 
@@ -270,16 +270,16 @@ class Board {
     if (
       // 左
       (clonedBoardState[left.x][left.y] === oppositeColor(color) &&
-        Board.isSurroundedByEnemy(left, clonedBoardState)) ||
+        Board.isGroupSurroundedByEnemy(left, clonedBoardState)) ||
       // 上
       (clonedBoardState[upper.x][upper.y] === oppositeColor(color) &&
-        Board.isSurroundedByEnemy(upper, clonedBoardState)) ||
+        Board.isGroupSurroundedByEnemy(upper, clonedBoardState)) ||
       // 右
       (clonedBoardState[right.x][right.y] === oppositeColor(color) &&
-        Board.isSurroundedByEnemy(right, clonedBoardState)) ||
+        Board.isGroupSurroundedByEnemy(right, clonedBoardState)) ||
       // 下
       (clonedBoardState[lower.x][lower.y] === oppositeColor(color) &&
-        Board.isSurroundedByEnemy(lower, clonedBoardState))
+        Board.isGroupSurroundedByEnemy(lower, clonedBoardState))
     ) {
       return false;
     }
@@ -288,11 +288,45 @@ class Board {
   }
 
   /**
-   * 地点に石があり、かつその石が敵石に囲まれているかどうかを判定
+   * 地点に石があり、かつその石が単体でが敵石に囲まれているかどうかを判定
    * @param point
    * @param boardState
    */
   private static isSurroundedByEnemy(point: Point, boardState: BoardState) {
+    if (
+      boardState[point.x][point.y] === PointState.Empty ||
+      boardState[point.x][point.y] === PointState.Edge
+    ) {
+      return false;
+    }
+
+    const oppoColor = oppositeColor(boardState[point.x][point.y] as Color);
+
+    if (
+      (boardState[point.x][point.y - 1] === PointState.Edge ||
+        boardState[point.x][point.y - 1] === oppoColor) &&
+      (boardState[point.x + 1][point.y] === PointState.Edge ||
+        boardState[point.x + 1][point.y] === oppoColor) &&
+      (boardState[point.x][point.y + 1] === PointState.Edge ||
+        boardState[point.x][point.y + 1] === oppoColor) &&
+      (boardState[point.x - 1][point.y] === PointState.Edge ||
+        boardState[point.x - 1][point.y] === oppoColor)
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * 地点に石があり、かつその石を含むグループが敵石に囲まれているかどうかを判定
+   * @param point
+   * @param boardState
+   */
+  private static isGroupSurroundedByEnemy(
+    point: Point,
+    boardState: BoardState
+  ) {
     if (
       boardState[point.x][point.y] === PointState.Empty ||
       boardState[point.x][point.y] === PointState.Edge
