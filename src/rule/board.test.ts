@@ -100,6 +100,35 @@ test("kou point can not placed soon", () => {
   }).toThrow(Error("The point is kou."));
 });
 
+test("Snapback(Uttegaesi) is not kou", () => {
+  const board = new Board({
+    gridNum: 9,
+    fixedStones: [
+      { color: Color.Black, point: { x: 3, y: 4 } },
+      { color: Color.Black, point: { x: 4, y: 3 } },
+      { color: Color.Black, point: { x: 5, y: 3 } },
+      { color: Color.Black, point: { x: 6, y: 4 } },
+      { color: Color.Black, point: { x: 6, y: 5 } },
+      { color: Color.Black, point: { x: 5, y: 6 } },
+
+      { color: Color.White, point: { x: 4, y: 4 } },
+      { color: Color.White, point: { x: 5, y: 4 } },
+      { color: Color.White, point: { x: 3, y: 5 } },
+      { color: Color.White, point: { x: 4, y: 6 } },
+    ],
+  });
+
+  board.takeMove({ color: Color.Black, point: { x: 4, y: 5 } });
+  board.takeMove({ color: Color.White, point: { x: 5, y: 5 } });
+  board.takeMove({ color: Color.Black, point: { x: 4, y: 5 } });
+  expect(board.getPointState({ x: 4, y: 4 })).toBe(PointState.Empty);
+  expect(board.getPointState({ x: 5, y: 4 })).toBe(PointState.Empty);
+  expect(board.getPointState({ x: 5, y: 5 })).toBe(PointState.Empty);
+  // expect(() => {
+  //   board.takeMove({ color: Color.White, point: { x: 4, y: 4 } });
+  // }).toThrow(Error("The point is kou."));
+});
+
 test("undo", () => {
   const board = new Board({
     gridNum: 9,
