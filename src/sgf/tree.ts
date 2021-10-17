@@ -1,20 +1,8 @@
-import { nanoid } from "nanoid";
-import {
-  Node,
-  RootNode,
-  InternalNode,
-  Properties,
-  cloneNode,
-  cloneProperties,
-} from "./";
+import { randmStr } from "../utils";
+import { Node, RootNode, InternalNode, cloneNode } from "./";
 import { propertiesToSgf } from "./stringifier";
-
-// [0]             equals '0'
-// [1]             equals '1'
-// [0,1]           equals '0.1'
-// [0,0,0,0,1,1,0] equals '0:4.1:2.0'
-// [0,0,1+]        equals [0.0.1.0...(500 times)]
-export type TreePath = Array<number>;
+import { Properties, cloneProperties } from "../types";
+import { TreePath } from "./path";
 
 type Props = {
   rootNode: RootNode;
@@ -86,12 +74,8 @@ class Tree {
    * get treepath of current node
    */
   public getCurrentPath(): TreePath {
-    if (this._currentNode == null) return [];
     const path: TreePath = [];
     const loop = (node: Node): void => {
-      if (node.isRoot()) {
-        path.unshift(0);
-      }
       if (node.isInternal()) {
         path.unshift(node.parent.children.findIndex((rn) => rn.id === node.id));
         loop(node.parent);
@@ -101,10 +85,26 @@ class Tree {
     loop(this._currentNode);
     return path;
   }
+  // あまり速度に違いは見られなかった
+  // public getCurrentPath(): TreePath {
+  //   if (this._currentNode == null) return [];
+  //   const path: TreePath = [];
+  //   const loop = (node: Node): void => {
+  //     if (node.isInternal()) {
+  //       path.push(node.parent.children.findIndex((rn) => rn.id === node.id));
+  //       loop(node.parent);
+  //     }
+  //   };
+
+  //   loop(this._currentNode);
+
+  //   const reversed = path.reverse();
+  //   return reversed;
+  // }
 
   public createChildNode(properties: Properties): InternalNode {
     return new InternalNode({
-      id: nanoid(),
+      id: randmStr(),
       properties,
       parent: this._currentNode,
     });

@@ -3,7 +3,7 @@ export function assertIsDefined<T>(val: T): asserts val is NonNullable<T> {
     // throw new AssertionError(
     //   `Expected 'val' to be defined, but received ${val}`
     // );
-    throw new Error();
+    throw new Error(`Expected 'val' to be defined, but received ${val}`);
   }
 }
 
@@ -18,4 +18,11 @@ export function copyMatrix<A>(base: Array<Array<A>>): Array<Array<A>> {
 export function nextAlpha(s: string): string {
   const alpha = "abcdefghijklmnopqrstuvwxyz".split("");
   return alpha[alpha.indexOf(s.toLowerCase()) + 1];
+}
+
+export function randmStr(): string {
+  return Math.random().toString(32).substring(2);
+}
+export function isUpperCase(c: string): boolean {
+  return /^[A-Z]+$/g.test(c);
 }

@@ -1,9 +1,7 @@
-import { Color, Move } from "../types";
+import { Color, Move, Property } from "../types";
 import { toPoint, pointTo } from "./parser";
-import { Property } from "./node";
-import { InternalNode } from "./node";
-import { nanoid } from "nanoid";
-import { Node } from "./node";
+import { Node, InternalNode } from "./node";
+import { randmStr } from "../utils";
 
 function nodeToMove(node: Node): Move {
   const b = node.properties[Property.B];
@@ -39,7 +37,7 @@ function nodeToMove(node: Node): Move {
 
 function moveToInternalNode(move: Move, parent: Node): InternalNode {
   return new InternalNode({
-    id: nanoid(),
+    id: randmStr(),
     properties: {
       [move.color === Color.Black ? "B" : "W"]:
         move.point != null ? [pointTo(move.point)] : [],

@@ -1,0 +1,8 @@
+src/
+node_modules/
+webpack.config.js
+.gihub/
+.vscode/
+.eslintrc.json
+.prettierignore
+.prettierrc.json

@@ -6,6 +6,12 @@ import {
   Point,
   PointState,
   Stone,
+  addProperty,
+  Property,
+  removeProperty,
+  MarkupSymbol,
+  markupSymbolToProperty,
+  cloneProperties,
 } from "./types";
 import {
   Tree,
@@ -14,14 +20,13 @@ import {
   toPoint,
   toTree,
   nodeToMove,
-  addProperty,
-  Property,
-  removeProperty,
+  cloneNode,
+  propertiesToSgf,
 } from "./sgf";
 import { Board } from "./rule";
 import { nextAlpha } from "./utils";
 
-type Option = {
+export type MoveOption = {
   idx: number;
   move: Move;
 };
@@ -153,7 +158,8 @@ class GennanCore {
     }
 
     // next
-    const nos = this.nextOptions.filter((no) => no.move.point != null);
+    const nos = this.nextMoveOptions.filter((no) => no.move.point != null);
+
     if (nos.length > 0) {
       nos.map((no) => {
         if (no.move.point != null) {
@@ -170,11 +176,49 @@ class GennanCore {
     return this.tree.toSgf();
   }
 
+  get snapshotSgf(): string {
+    // stones
+    const clonedRootProperties = cloneProperties(this.tree.rootNode.properties);
+    let newProps = clonedRootProperties;
+    const gridNum = this.board.boardState.length;
+    for (let x = 0; x < gridNum; x++) {
+      for (let y = 0; y < gridNum; y++) {
+        if (this.board.boardState[x][y] === PointState.Black) {
+          newProps = addProperty(newProps, Property.AB, pointTo({ x, y }));
+        }
+        if (this.board.boardState[x][y] === PointState.White) {
+          newProps = addProperty(newProps, Property.AW, pointTo({ x, y }));
+        }
+      }
+    }
+
+    // markups
+    this.tree.properties[Property.CR]?.map((cp) => {
+      newProps = addProperty(newProps, Property.CR, cp);
+    });
+    this.tree.properties[Property.TR]?.map((tp) => {
+      newProps = addProperty(newProps, Property.TR, tp);
+    });
+    this.tree.properties[Property.SQ]?.map((sp) => {
+      newProps = addProperty(newProps, Property.SQ, sp);
+    });
+    this.tree.properties[Property.MA]?.map((map) => {
+      newProps = addProperty(newProps, Property.MA, map);
+    });
+    this.tree.properties[Property.LB]?.map((lbp) => {
+      newProps = addProperty(newProps, Property.LB, lbp);
+    });
+
+    const sgf = propertiesToSgf(newProps);
+
+    return "(" + sgf + ")";
+  }
+
   get currentPath(): TreePath {
     return this.tree.getCurrentPath();
   }
 
-  get nextOptions(): Array<Option> {
+  get nextMoveOptions(): Array<MoveOption> {
     return this.tree.nextNodes.map((v, i) => {
       return {
         idx: i,
@@ -189,11 +233,16 @@ class GennanCore {
       const gn = Number(sz[0]);
       if (isGridNum(gn)) return gn;
     }
-    return this.board.gridNum;
+
+    return this.board ? this.board.gridNum : 19;
   }
 
   get teban(): Color {
     return this.board.teban;
+  }
+
+  get phase(): Number {
+    return this.board.phase;
   }
 
   get fixedStones(): Array<Stone> {
@@ -250,17 +299,46 @@ class GennanCore {
     this.setRootProp(Property.PW, whitePlayer);
   }
 
-  get komi(): number | undefined {
+  get komi(): string | undefined {
     const km = this.tree.rootProperties[Property.KM];
     if (km != null) {
-      return Number(km[0]);
+      return km[0];
     }
   }
-  public setKomi(komi: number): void {
+
+  public setKomi(komi: string): void {
     if (this.komi != null) {
-      this.removeRootProp(Property.KM, this.komi.toString());
+      this.removeRootProp(Property.KM, this.komi);
     }
-    this.setRootProp(Property.KM, komi.toString());
+    this.setRootProp(Property.KM, komi);
+  }
+
+  get gameDate(): string | undefined {
+    const date = this.tree.rootProperties[Property.DT];
+    if (date != null) {
+      return date[0];
+    }
+  }
+
+  public setGameDate(date: string): void {
+    if (this.gameDate != null) {
+      this.removeRootProp(Property.DT, this.gameDate);
+    }
+    this.setRootProp(Property.DT, date);
+  }
+
+  get gameResult(): string | undefined {
+    const result = this.tree.rootProperties[Property.RE];
+    if (result != null) {
+      return result[0];
+    }
+  }
+
+  public setGameResult(result: string): void {
+    if (this.gameResult != null) {
+      this.removeRootProp(Property.RE, this.gameResult);
+    }
+    this.setRootProp(Property.RE, result);
   }
 
   get comment(): string | undefined {
@@ -283,12 +361,32 @@ class GennanCore {
     });
   }
 
+  get existsNextMove(): boolean {
+    return !this.tree.atLeaf();
+  }
+  get existsBackMove(): boolean {
+    return !this.tree.atRoot();
+  }
+
+  public clone(): GennanCore {
+    const cloned = GennanCore.createFromSgf(this.sgf);
+    cloned.setFromInitPath(this.currentPath);
+    return cloned;
+  }
+
   public playForward(idx = 0): void {
-    if (this.tree.atLeaf()) throw new Error("There are not next moves.");
+    if (!this.existsNextMove) throw new Error("There are not next moves.");
     if (!this.tree.nextNodes[idx]) throw new Error("Move index is invalid.");
 
     this.board.takeMove(nodeToMove(this.tree.nextNodes[idx]));
     this.tree.down(idx);
+  }
+  public playForwardTimes(times = 10, stopOnComment = true): void {
+    for (let i = 0; i < times; i++) {
+      if (!this.existsNextMove) break;
+      this.playForward();
+      if (this.comment != null && stopOnComment) break;
+    }
   }
 
   public playBackward(): void {
@@ -297,17 +395,27 @@ class GennanCore {
     this.board.undoMove();
     this.tree.up();
   }
+  public playBackwardTimes(times = 10, stopOnComment = true): void {
+    for (let i = 0; i < times; i++) {
+      if (!this.existsBackMove) break;
+      this.playBackward();
+      if (this.comment != null && stopOnComment) break;
+    }
+  }
 
-  public playToPath(path_: TreePath): void {
-    // 初期化
+  public setFromInitPath(initPath: TreePath): void {
+    // initialize
     this.tree = toTree(this.sgf);
-    this.board = new Board({});
+    this.board = new Board({
+      gridNum: this.gridNum,
+      fixedStones: this.fixedStones,
+    });
+    this.setFromFragment(initPath);
+  }
 
-    // 移動
-    const path = [...path_];
-    if (path.length > 0) path.shift(); // 最初がrootNode
-    while (path.length > 0) {
-      this.playForward(path.shift());
+  public setFromFragment(path: TreePath): void {
+    for (let i = 0; i < path.length; i++) {
+      if (this.existsNextMove) this.playForward(path[i]);
     }
   }
 
@@ -322,17 +430,10 @@ class GennanCore {
 
   // 一手削除する
   public removeMove(): void {
-    if (this.existsBackMove()) {
+    if (this.existsBackMove) {
       this.tree.removeNode();
       this.board.undoMove();
     }
-  }
-
-  public existsNextMove(): boolean {
-    return this.tree.nextNodes.length > 0;
-  }
-  public existsBackMove(): boolean {
-    return !this.tree.atRoot();
   }
 
   private setProp(property: Property, sgf: string): void {
@@ -353,29 +454,29 @@ class GennanCore {
     this.tree.setRootProps(newProps);
   }
 
-  public setCircle(point: Point): void {
-    this.setProp(Property.CR, pointTo(point));
+  public setSymbol(point: Point, symbol: MarkupSymbol): void {
+    this.setProp(markupSymbolToProperty(symbol), pointTo(point));
   }
-  public removeCircle(point: Point): void {
-    this.removeProp(Property.CR, pointTo(point));
+  public removeSymbol(point: Point, symbol: MarkupSymbol): void {
+    this.removeProp(markupSymbolToProperty(symbol), pointTo(point));
   }
-  public setSquare(point: Point): void {
-    this.setProp(Property.SQ, pointTo(point));
+
+  public setText(point: Point, text: string): void {
+    this.setProp(Property.LB, pointTo(point) + ":" + text);
   }
-  public removeSquare(point: Point): void {
-    this.removeProp(Property.SQ, pointTo(point));
-  }
-  public setTriangle(point: Point): void {
-    this.setProp(Property.TR, pointTo(point));
-  }
-  public removeTriangle(point: Point): void {
-    this.removeProp(Property.TR, pointTo(point));
-  }
-  public setCross(point: Point): void {
-    this.setProp(Property.MA, pointTo(point));
-  }
-  public removeCross(point: Point): void {
-    this.removeProp(Property.MA, pointTo(point));
+
+  public removeText(point: Point): void {
+    const sgf = pointTo(point);
+    const properties = this.tree.properties;
+    const LB = properties[Property.LB];
+
+    if (LB != null) {
+      // 取り除く
+      properties[Property.LB] = LB.filter((v) => v.slice(0, 2) !== sgf);
+    }
+
+    // 更新
+    this.tree.setProps(properties);
   }
 
   public setAlpha(point: Point): void {
@@ -415,20 +516,6 @@ class GennanCore {
     }
 
     this.setProp(Property.LB, ps + ":" + next.toString());
-  }
-
-  public removeText(point: Point): void {
-    const sgf = pointTo(point);
-    const properties = this.tree.properties;
-    const LB = properties[Property.LB];
-
-    if (LB != null) {
-      // 取り除く
-      properties[Property.LB] = LB.filter((v) => v.slice(0, 2) !== sgf);
-    }
-
-    // 更新
-    this.tree.setProps(properties);
   }
 
   /**

@@ -22,12 +22,12 @@ type props = {
 };
 
 class Board {
-  gridNum: GridNum;
+  private _gridNum: GridNum;
   private _boardState: BoardState = [[]];
-  fixedStones: Array<Stone> = [];
-  kou?: Point;
-  phase = 0;
-  teban: Color;
+  private _fixedStones: Array<Stone> = [];
+  private _kou?: Point;
+  private _phase = 0;
+  private _teban: Color;
   private history: Array<{
     move: Move;
     capturedStones: Array<Stone>;
@@ -46,18 +46,30 @@ class Board {
     fixedStones = [],
     teban = Color.Black,
   }: props) {
-    this.gridNum = gridNum;
+    this._gridNum = gridNum;
     this.initBoardState();
     this.setFixedStones(fixedStones);
-    this.teban = teban;
+    this._teban = teban;
   }
 
   get boardState(): BoardState {
     return this._boardState;
   }
 
+  get gridNum(): GridNum {
+    return this._gridNum;
+  }
+
+  get teban(): Color {
+    return this._teban;
+  }
+
+  get phase(): Number {
+    return this._phase;
+  }
+
   private setFixedStones(fixedStones: Array<Stone>): void {
-    this.fixedStones = fixedStones;
+    this._fixedStones = fixedStones;
     fixedStones.map((s) => (this._boardState[s.point.x][s.point.y] = s.color));
   }
 
@@ -96,8 +108,8 @@ class Board {
   }
 
   public takeMove(move: Move): void {
-    if (this.teban !== move.color) throw new Error("Teban color is invalid.");
-    const prevKou = this.kou;
+    // if (this.teban !== move.color) throw new Error("Teban color is invalid.");
+    const prevKou = this._kou;
     const capturedStones: Array<Stone> = [];
     // パスでない場合
     if (move.point != null) {
@@ -108,9 +120,9 @@ class Board {
       }
       // check kou
       if (
-        this.kou != null &&
-        this.kou.x === move.point.x &&
-        this.kou.y === move.point.y
+        this._kou != null &&
+        this._kou.x === move.point.x &&
+        this._kou.y === move.point.y
       ) {
         throw new Error("The point is kou.");
       }
@@ -128,7 +140,7 @@ class Board {
       const capture = (p: Point): void => {
         if (
           clonedBoardState[p.x][p.y] === oppoColor &&
-          Board.isSurroundedByEnemy(p, clonedBoardState)
+          Board.isGroupSurroundedByEnemy(p, clonedBoardState)
         ) {
           // 石が取れたら重複を排除しつつ追加する
           Board.getConnectedStones(p, clonedBoardState).map((s) => {
@@ -149,12 +161,12 @@ class Board {
       capture(lowerP(move.point));
 
       // コウを記録
-      this.kou = undefined;
+      this._kou = undefined;
       if (
         capturedStones.length === 1 &&
         Board.isSurroundedByEnemy(move.point, clonedBoardState)
       ) {
-        this.kou = capturedStones[0].point;
+        this._kou = capturedStones[0].point;
       }
 
       // 取られた地点を空にする
@@ -174,8 +186,8 @@ class Board {
       capturedStones,
       kou: prevKou,
     });
-    this.phase += 1; // 手数を進める
-    this.teban = oppositeColor(move.color); // 手番を変える
+    this._phase += 1; // 手数を進める
+    this._teban = oppositeColor(move.color); // 手番を変える
   }
 
   public undoMove(): void {
@@ -193,9 +205,9 @@ class Board {
     });
     this.capturesCount[oppositeColor(history.move.color)] -=
       history.capturedStones.length; // 取られた石数を戻す
-    this.kou = history.kou; // コウをセット
-    this.phase -= 1; // 手数を戻す
-    this.teban = history.move.color; // 手番を戻す
+    this._kou = history.kou; // コウをセット
+    this._phase -= 1; // 手数を戻す
+    this._teban = history.move.color; // 手番を戻す
   }
 
   /**
@@ -246,7 +258,7 @@ class Board {
     clonedBoardState[point.x][point.y] = color;
 
     // - 置いた石が敵石に囲まれていなければ自殺手ではない
-    if (!Board.isSurroundedByEnemy(point, clonedBoardState)) {
+    if (!Board.isGroupSurroundedByEnemy(point, clonedBoardState)) {
       return false;
     }
 
@@ -258,16 +270,16 @@ class Board {
     if (
       // 左
       (clonedBoardState[left.x][left.y] === oppositeColor(color) &&
-        Board.isSurroundedByEnemy(left, clonedBoardState)) ||
+        Board.isGroupSurroundedByEnemy(left, clonedBoardState)) ||
       // 上
       (clonedBoardState[upper.x][upper.y] === oppositeColor(color) &&
-        Board.isSurroundedByEnemy(upper, clonedBoardState)) ||
+        Board.isGroupSurroundedByEnemy(upper, clonedBoardState)) ||
       // 右
       (clonedBoardState[right.x][right.y] === oppositeColor(color) &&
-        Board.isSurroundedByEnemy(right, clonedBoardState)) ||
+        Board.isGroupSurroundedByEnemy(right, clonedBoardState)) ||
       // 下
       (clonedBoardState[lower.x][lower.y] === oppositeColor(color) &&
-        Board.isSurroundedByEnemy(lower, clonedBoardState))
+        Board.isGroupSurroundedByEnemy(lower, clonedBoardState))
     ) {
       return false;
     }
@@ -276,11 +288,45 @@ class Board {
   }
 
   /**
-   * 地点に石があり、かつその石が敵石に囲まれているかどうかを判定
+   * 地点に石があり、かつその石が単体でが敵石に囲まれているかどうかを判定
    * @param point
    * @param boardState
    */
   private static isSurroundedByEnemy(point: Point, boardState: BoardState) {
+    if (
+      boardState[point.x][point.y] === PointState.Empty ||
+      boardState[point.x][point.y] === PointState.Edge
+    ) {
+      return false;
+    }
+
+    const oppoColor = oppositeColor(boardState[point.x][point.y] as Color);
+
+    if (
+      (boardState[point.x][point.y - 1] === PointState.Edge ||
+        boardState[point.x][point.y - 1] === oppoColor) &&
+      (boardState[point.x + 1][point.y] === PointState.Edge ||
+        boardState[point.x + 1][point.y] === oppoColor) &&
+      (boardState[point.x][point.y + 1] === PointState.Edge ||
+        boardState[point.x][point.y + 1] === oppoColor) &&
+      (boardState[point.x - 1][point.y] === PointState.Edge ||
+        boardState[point.x - 1][point.y] === oppoColor)
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * 地点に石があり、かつその石を含むグループが敵石に囲まれているかどうかを判定
+   * @param point
+   * @param boardState
+   */
+  private static isGroupSurroundedByEnemy(
+    point: Point,
+    boardState: BoardState
+  ) {
     if (
       boardState[point.x][point.y] === PointState.Empty ||
       boardState[point.x][point.y] === PointState.Edge
