@@ -1,6 +1,6 @@
 {
   "name": "gennan-core",
-  "version": "1.0.40",
+  "version": "0.0.0-semantic-release",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
