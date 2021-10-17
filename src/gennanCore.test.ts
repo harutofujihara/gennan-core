@@ -350,5 +350,4 @@ test("test", () => {
     ))`;
 
   const gc = GennanCore.createFromSgf(sgf);
-  console.log(gc.gridNum);
 });
