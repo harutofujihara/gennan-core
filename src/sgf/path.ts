@@ -1,3 +1,6 @@
+// refer to
+// https://github.com/Kashomon/glift/blob/master/deps/glift-core/rules/treepath.js
+
 // [0]             equals '0'
 // [1]             equals '1'
 // [0,1]           equals '0.1'
